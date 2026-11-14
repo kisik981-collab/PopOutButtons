@@ -1,1 +1,20 @@
-
+name: Build Rootless Deb
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Theos
+        uses: theos/setup-theos@v1
+      - name: Add GcUniversal headers
+        run: |
+          mkdir -p $THEOS/include/GcUniversal
+          curl -sL https://githubusercontent.com -o $THEOS/include/GcUniversal/GcColorPickerUtils.h
+      - name: Build package
+        run: make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
+      - name: Upload deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: PopOutButtons-Rootless
+          path: packages/*.deb
